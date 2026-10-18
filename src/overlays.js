@@ -19,19 +19,22 @@ const spaced = s => s.split('').join(' '); // hair spaces for small caps track
  * Where things sit on each screen, as fractions of the image height.
  * lock: below the big clock, footer between the flashlight and camera buttons.
  * home: below a row of widgets and above the page dots and dock, with no footer (the dock covers it).
+ * horizon: where ground-line styles (arcade, city, garden, tide, sky) end, so their edge stays
+ * clear of the calendar header: the bottom of the clock on the lock screen, the bottom of a
+ * widget row on the home screen.
  */
 const LAYOUTS = Object.freeze({
   lock: {
     month: { top: 0.592, labelH: 0.022, row: 0.029, row6: 0.027, holidayGap: 0.022, weekGap: 0.032, weekLetters: true },
     year: { top: 0.597, bottom: 0.845 },
     zones: { month: [0.545, 0.885], year: [0.555, 0.86], none: null },
-    horizon: 0.565, diyaY: 0.555, footer: true, caption: true,
+    horizon: 0.535, diyaY: 0.555, footer: true, caption: true,
   },
   home: {
     month: { top: 0.566, labelH: 0.02, row: 0.0262, row6: 0.0235, holidayGap: 0.021, weekGap: 0.03, weekLetters: false },
     year: { top: 0.585, bottom: 0.79 },
     zones: { month: [0.525, 0.81], year: [0.53, 0.8], none: null },
-    horizon: 0.54, diyaY: 0.533, footer: false, caption: false,
+    horizon: 0.512, diyaY: 0.533, footer: false, caption: false,
   },
 });
 const layoutFor = screen => LAYOUTS[screen] || LAYOUTS.lock;
