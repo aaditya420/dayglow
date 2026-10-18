@@ -1,6 +1,6 @@
 {
   "name": "dayglow",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "Procedural iPhone lock screen wallpapers with your month, week and year progress, served as a PNG from one Vercel function.",
   "license": "MIT",
   "author": "Aaditya Verma (https://github.com/aaditya420)",

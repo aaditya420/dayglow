@@ -7,6 +7,7 @@ const { isValidTimeZone, nowIn } = require('./time');
 
 const LIMITS = Object.freeze({ minW: 300, maxW: 2000, minH: 600, maxH: 4400, seedLength: 64 });
 const VIEWS = ['month', 'year', 'none'];
+const SCREENS = ['lock', 'home'];
 const FORMATS = { png: 'png', jpg: 'jpeg', jpeg: 'jpeg', webp: 'webp' };
 const PALETTE_NAMES = ['auto', 'random', ...Object.keys(PALETTES)];
 const DATE_RE = /^([0-9]{4})-([0-9]{2})-([0-9]{2})(?:T([0-9]{2})(?::([0-9]{2}))?)?$/;
@@ -55,15 +56,18 @@ function parseOptions(q, env = process.env, instant = new Date()){
   const style = String(q.get('style') || 'shapes').toLowerCase();
   const view = String(q.get('view') || 'month').toLowerCase();
   const palette = String(q.get('palette') || 'auto').toLowerCase();
+  const screen = String(q.get('screen') || 'lock').toLowerCase();
   const seed = q.get('seed');
   const warnings = [];
   if (!(style === 'gallery' || style === 'random' || STYLE_IDS.includes(style))) warnings.push(`unknown style "${style.slice(0, 20)}"`);
   if (!VIEWS.includes(view)) warnings.push(`unknown view "${view.slice(0, 20)}"`);
   if (!PALETTE_NAMES.includes(palette)) warnings.push(`unknown palette "${palette.slice(0, 20)}"`);
+  if (!SCREENS.includes(screen)) warnings.push(`unknown screen "${screen.slice(0, 20)}"`);
 
   return {
     style: STYLE_IDS.includes(style) || style === 'gallery' || style === 'random' ? style : 'shapes',
     view: VIEWS.includes(view) ? view : 'month',
+    screen: SCREENS.includes(screen) ? screen : 'lock',
     palette: PALETTE_NAMES.includes(palette) ? palette : 'auto',
     seed: seed == null || seed === '' ? null : String(seed).slice(0, LIMITS.seedLength),
     tod: flag(q.get('tod'), true),
@@ -80,4 +84,4 @@ function parseOptions(q, env = process.env, instant = new Date()){
   };
 }
 
-module.exports = { parseOptions, defaults, LIMITS, VIEWS, PALETTE_NAMES, FORMATS };
+module.exports = { parseOptions, defaults, LIMITS, VIEWS, SCREENS, PALETTE_NAMES, FORMATS };

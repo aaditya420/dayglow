@@ -8,15 +8,44 @@
     }
   },
   "rewrites": [
-    { "source": "/month.png", "destination": "/api/wallpaper?view=month" },
-    { "source": "/year.png", "destination": "/api/wallpaper?view=year" },
-    { "source": "/art.png", "destination": "/api/wallpaper?style=gallery" },
-    { "source": "/", "destination": "/api/wallpaper?view=month" }
+    {
+      "source": "/month.png",
+      "destination": "/api/wallpaper?view=month"
+    },
+    {
+      "source": "/year.png",
+      "destination": "/api/wallpaper?view=year"
+    },
+    {
+      "source": "/home.png",
+      "destination": "/api/wallpaper?view=month&screen=home"
+    },
+    {
+      "source": "/home-year.png",
+      "destination": "/api/wallpaper?view=year&screen=home"
+    },
+    {
+      "source": "/art.png",
+      "destination": "/api/wallpaper?style=gallery"
+    },
+    {
+      "source": "/",
+      "destination": "/api/wallpaper?view=month"
+    }
   ],
   "headers": [
-    { "source": "/(.*)", "headers": [
-      { "key": "X-Content-Type-Options", "value": "nosniff" },
-      { "key": "Referrer-Policy", "value": "no-referrer" }
-    ] }
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "X-Content-Type-Options",
+          "value": "nosniff"
+        },
+        {
+          "key": "Referrer-Policy",
+          "value": "no-referrer"
+        }
+      ]
+    }
   ]
 }

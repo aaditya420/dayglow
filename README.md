@@ -32,6 +32,16 @@
 2. Run it once to check.
 3. In **Automation**, add a **Time of Day** trigger (for example 12:05 AM, daily) and choose **Run Immediately**. Turn off **Notify When Run**.
 
+### Matching lock and home screens
+
+Each pull picks a new random design, so two separate pulls give two different wallpapers. To get the same art on both screens with the calendar placed for each, share one seed:
+
+1. **Random Number** (1 to 999999).
+2. **Get Contents of URL**: `https://<your-project>.vercel.app/month.png?style=gallery&seed=` followed by the Random Number. Then **Set Wallpaper Photo** → **Lock Screen**.
+3. **Get Contents of URL**: the same URL with `/home.png` instead of `/month.png`, and the same Random Number. Then **Set Wallpaper Photo** → **Home Screen**.
+
+The home screen photo only changes if that wallpaper's Home Screen is set to show its own photo. If it doesn't update, long-press the Lock Screen, tap **Customize → Home Screen**, and pick any photo once.
+
 Want a new design more often? Add more Time of Day automations, or trigger on events such as opening an app, stopping an alarm or connecting the charger. To pick between looks, put a **Choose from Menu** action before Get Contents of URL with one URL per option.
 
 > If the Shortcut runs but your lock screen doesn't change, the action is updating a wallpaper that isn't the active one. Choose **Current** in the Set Wallpaper action.
@@ -44,6 +54,8 @@ Want a new design more often? Add more Time of Day automations, or trigger on ev
 | --- | --- |
 | `/month.png` | `/api/wallpaper?view=month` |
 | `/year.png` | `/api/wallpaper?view=year` |
+| `/home.png` | `/api/wallpaper?view=month&screen=home` |
+| `/home-year.png` | `/api/wallpaper?view=year&screen=home` |
 | `/art.png` | `/api/wallpaper?style=gallery` |
 
 Add query parameters to any of them, for example `/month.png?style=sky&lat=19.07&lon=72.88`.
@@ -52,6 +64,7 @@ Add query parameters to any of them, for example `/month.png?style=sky&lat=19.07
 | --- | --- | --- | --- |
 | `style` | a style id below, or `gallery` | `shapes` | The art. `gallery` picks a random style on every pull. |
 | `view` | `month`, `year`, `none` | `month` | The calendar drawn over the art. `none` is art only. |
+| `screen` | `lock`, `home` | `lock` | `home` moves the calendar up into the space between a row of widgets and the page dots, and drops the footer and caption that the dock would cover. |
 | `seed` | `random`, `daily`, `hourly`, a number or any text | `random` | Random gives a new design each pull. Pin a number to keep one you like. |
 | `palette` | `auto`, `random`, `midnight`, `ember`, `ocean`, `forest`, `rose`, `violet`, `mono`, `dawn` | `auto` | `auto` follows the season and the time of day. |
 | `tod` | `1`, `0` | `1` | With `palette=auto`, shift colours for dawn, dusk and night. |
