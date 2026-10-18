@@ -17,14 +17,6 @@
       "destination": "/api/wallpaper?view=year"
     },
     {
-      "source": "/home.png",
-      "destination": "/api/wallpaper?view=month&screen=home"
-    },
-    {
-      "source": "/home-year.png",
-      "destination": "/api/wallpaper?view=year&screen=home"
-    },
-    {
       "source": "/art.png",
       "destination": "/api/wallpaper?style=gallery"
     },

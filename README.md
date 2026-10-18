@@ -38,7 +38,7 @@ Each pull picks a new random design, so two separate pulls give two different wa
 
 1. **Random Number** (1 to 999999).
 2. **Get Contents of URL**: `https://<your-project>.vercel.app/month.png?style=gallery&seed=` followed by the Random Number. Then **Set Wallpaper Photo** → **Lock Screen**.
-3. **Get Contents of URL**: the same URL with `/home.png` instead of `/month.png`, and the same Random Number. Then **Set Wallpaper Photo** → **Home Screen**.
+3. **Get Contents of URL**: the same URL with `&screen=home` added at the end, and the same Random Number. Then **Set Wallpaper Photo** → **Home Screen**.
 
 The home screen photo only changes if that wallpaper's Home Screen is set to show its own photo. If it doesn't update, long-press the Lock Screen, tap **Customize → Home Screen**, and pick any photo once.
 
@@ -54,8 +54,6 @@ Want a new design more often? Add more Time of Day automations, or trigger on ev
 | --- | --- |
 | `/month.png` | `/api/wallpaper?view=month` |
 | `/year.png` | `/api/wallpaper?view=year` |
-| `/home.png` | `/api/wallpaper?view=month&screen=home` |
-| `/home-year.png` | `/api/wallpaper?view=year&screen=home` |
 | `/art.png` | `/api/wallpaper?style=gallery` |
 
 Add query parameters to any of them, for example `/month.png?style=sky&lat=19.07&lon=72.88`.
