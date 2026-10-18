@@ -23,8 +23,8 @@ jobs:
     steps:
       - uses: actions/checkout@v7
         with:
-          # pull requests need the history between base and head to check commit messages
-          fetch-depth: ${{ github.event_name == 'pull_request' && 0 || 1 }}
+          # full history so the commit check can walk base..head (the repo is small)
+          fetch-depth: 0
       - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
