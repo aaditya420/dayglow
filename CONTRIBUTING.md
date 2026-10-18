@@ -47,7 +47,8 @@ Cite an official source in `source`. Dates use `YYYY-MM-DD`.
 - Keep each pull request focused on one change and describe what it does and why.
 - Add or update tests for behaviour changes.
 - Make sure `npm run check` passes. CI runs the same checks.
-- Use clear commit messages in the imperative mood, for example "Add aurora palette for winter".
+- Write commit messages and the pull request title as [Conventional Commits](https://www.conventionalcommits.org/en/v1.0.0/), for example `feat(aurora): add a winter palette` or `fix(tide): keep the waterline above the calendar`. CI checks them. Pull requests are squash-merged, so the title becomes the commit on `main`.
+- Add a line under `## [Unreleased]` in [CHANGELOG.md](CHANGELOG.md) for user-visible changes. Versions follow [Semantic Versioning](https://semver.org/); see [CLAUDE.md](CLAUDE.md) for what counts as major, minor and patch.
 - By contributing you agree that your work is released under the [MIT License](LICENSE).
 
 ## Reporting bugs

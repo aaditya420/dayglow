@@ -178,7 +178,7 @@ If you also connected the repository through Vercel's Git integration, disable o
 
 ## Contributing
 
-Ideas, new styles, holiday calendars and fixes are all welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started, and please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Security issues go through [SECURITY.md](SECURITY.md), not public issues.
+Ideas, new styles, holiday calendars and fixes are all welcome. Read [CONTRIBUTING.md](CONTRIBUTING.md) to get started (coding agents: [CLAUDE.md](CLAUDE.md) has the full rules, including Conventional Commits and SemVer), and please follow the [Code of Conduct](CODE_OF_CONDUCT.md). Security issues go through [SECURITY.md](SECURITY.md), not public issues.
 
 ## License
 

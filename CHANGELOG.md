@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Added
+
+- CLAUDE.md with the project's engineering, commit and release rules.
+- CI checks that pull request titles and commits follow Conventional Commits; Dependabot now writes `chore(deps)` and `ci(deps)` messages.
+
 ## [1.1.1] - 2026-10-18
 
 ### Fixed
