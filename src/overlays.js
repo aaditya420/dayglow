@@ -15,8 +15,26 @@ const SHORT_DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 const LETTERS = 'MTWTFSS';
 const spaced = s => s.split('').join(' '); // hair spaces for small caps tracking
 
-/** Vertical band each view occupies, as fractions of height. Art styles keep calm here. */
-const ZONES = Object.freeze({ month: [0.545, 0.885], year: [0.555, 0.86], none: null });
+/**
+ * Where things sit on each screen, as fractions of the image height.
+ * lock: below the big clock, footer between the flashlight and camera buttons.
+ * home: below a row of widgets and above the page dots and dock, with no footer (the dock covers it).
+ */
+const LAYOUTS = Object.freeze({
+  lock: {
+    month: { top: 0.592, labelH: 0.022, row: 0.029, row6: 0.027, holidayGap: 0.022, weekGap: 0.032, weekLetters: true },
+    year: { top: 0.597, bottom: 0.845 },
+    zones: { month: [0.545, 0.885], year: [0.555, 0.86], none: null },
+    horizon: 0.565, diyaY: 0.555, footer: true, caption: true,
+  },
+  home: {
+    month: { top: 0.566, labelH: 0.02, row: 0.0262, row6: 0.0235, holidayGap: 0.021, weekGap: 0.03, weekLetters: false },
+    year: { top: 0.585, bottom: 0.79 },
+    zones: { month: [0.525, 0.81], year: [0.53, 0.8], none: null },
+    horizon: 0.54, diyaY: 0.533, footer: false, caption: false,
+  },
+});
+const layoutFor = screen => LAYOUTS[screen] || LAYOUTS.lock;
 
 function header(ctx, W, left, sub, right, x0, x1, y){
   const fs = Math.round(W*0.036);
@@ -39,10 +57,10 @@ function fit(ctx, text, maxW){
 }
 
 /** 365-day grid of PlayStation-style symbols; the symbol changes with the month. */
-function drawYear(ctx, W, H, I){
+function drawYear(ctx, W, H, I, L = LAYOUTS.lock){
   const { y, doy: day, total, hol } = I;
   const cols = 23, rows = Math.ceil(total/cols);
-  const gTop = H*0.597, cell = Math.min(W*0.78/cols, (H*0.845 - gTop)/rows);
+  const gTop = H*L.year.top, cell = Math.min(W*0.78/cols, (H*L.year.bottom - gTop)/rows);
   const gW = cell*cols, gLeft = (W - gW)/2, r = cell*0.3;
   header(ctx, W, String(y), `DAY ${day} OF ${total}`, (day/total*100).toFixed(1) + '%', gLeft + cell*0.1, gLeft + gW - cell*0.1, gTop - cell*0.75);
   for (let i = 0; i < total; i++){
@@ -62,15 +80,15 @@ function drawYear(ctx, W, H, I){
   }
   ctx.globalAlpha = 1;
   const left = total - day;
-  footer(ctx, W, H, left === 1 ? '1 day left' : `${left} days left`);
+  if (L.footer) footer(ctx, W, H, left === 1 ? '1 day left' : `${left} days left`);
 }
 
 /** Month calendar (Monday first), next-holiday line and a seven-segment week strip. */
-function drawMonthWeek(ctx, W, H, I){
+function drawMonthWeek(ctx, W, H, I, L = LAYOUTS.lock){
   const { y, m, d, dim, week, weekday: wd, hol } = I;
   const offset = (D(y, m, 1).getUTCDay() + 6) % 7, rows = Math.ceil((offset + dim)/7);
   const gW = W*0.78, gLeft = (W - gW)/2, cw = gW/7, x0 = gLeft + cw*0.12, x1 = gLeft + gW - cw*0.12;
-  const top = H*0.592, labelH = H*0.022, ch = H*(rows === 6 ? 0.027 : 0.029);
+  const M = L.month, top = H*M.top, labelH = H*M.labelH, ch = H*(rows === 6 ? M.row6 : M.row);
   const gridTop = top + labelH, gridBottom = gridTop + rows*ch, type = m % 4;
 
   header(ctx, W, MONTHS[m], `DAY ${d} OF ${dim}`, (d/dim*100).toFixed(1) + '%', x0, x1, top - H*0.012);
@@ -103,7 +121,7 @@ function drawMonthWeek(ctx, W, H, I){
   let lineY = gridBottom;
   const nh = hol.next(y, m, d);
   if (nh){
-    lineY = gridBottom + H*0.022;
+    lineY = gridBottom + H*M.holidayGap;
     const fs2 = Math.round(W*0.026);
     ctx.textBaseline = 'alphabetic';
     ctx.beginPath(); ctx.arc(x0 + W*0.006, lineY - fs2*0.34, W*0.0058, 0, TAU); ctx.fillStyle = C.holiday; ctx.fill();
@@ -115,7 +133,7 @@ function drawMonthWeek(ctx, W, H, I){
     ctx.textAlign = 'left'; ctx.fillStyle = C.text; ctx.fillText(fit(ctx, label, maxW), x0 + W*0.022, lineY);
   }
 
-  const wTop = lineY + H*(nh ? 0.032 : 0.03);
+  const wTop = lineY + H*(nh ? M.weekGap : M.weekGap - 0.002);
   header(ctx, W, `Week ${week}`, DAYS[wd].toUpperCase(), Math.round((wd + 1)/7*100) + '%', x0, x1, wTop);
   const segGap = W*0.012, segW = (x1 - x0 - segGap*6)/7, segH = H*0.009, sy = wTop + H*0.014;
   for (let i = 0; i < 7; i++){
@@ -124,13 +142,15 @@ function drawMonthWeek(ctx, W, H, I){
     else if (i < wd){ ctx.globalAlpha = 0.9; ctx.fillStyle = C.past; ctx.fill(); ctx.globalAlpha = 1; }
     else { ctx.strokeStyle = C.future; ctx.lineWidth = W*0.003; ctx.stroke(); }
   }
-  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.font = `700 ${Math.round(W*0.021)}px ${FONT}`;
-  for (let i = 0; i < 7; i++){
-    ctx.fillStyle = i === wd ? C.today : i < wd ? C.dim : C.futureText;
-    ctx.fillText(LETTERS[i], x0 + i*(segW + segGap) + segW/2, sy + segH + H*0.016);
+  if (M.weekLetters){
+    ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic'; ctx.font = `700 ${Math.round(W*0.021)}px ${FONT}`;
+    for (let i = 0; i < 7; i++){
+      ctx.fillStyle = i === wd ? C.today : i < wd ? C.dim : C.futureText;
+      ctx.fillText(LETTERS[i], x0 + i*(segW + segGap) + segW/2, sy + segH + H*0.016);
+    }
   }
   const leftM = dim - d;
-  footer(ctx, W, H, leftM === 0 ? 'Last day of the month' : `${leftM} ${leftM === 1 ? 'day' : 'days'} left in ${MONTHS[m]}`);
+  if (L.footer) footer(ctx, W, H, leftM === 0 ? 'Last day of the month' : `${leftM} ${leftM === 1 ? 'day' : 'days'} left in ${MONTHS[m]}`);
 }
 
 /** Darken the art behind the calendar so text stays readable on busy styles. */
@@ -150,12 +170,12 @@ function vignette(ctx, W, H){
 }
 
 /** Light-touch decorations for the day's holiday, matched by name. */
-function festival(ctx, W, H, R, name){
+function festival(ctx, W, H, R, name, L = LAYOUTS.lock){
   if (!name) return;
   if (/Diwali|Deepavali/.test(name)){
     for (let i = 0; i < 46; i++) glow(ctx, R()*W, R()*H*0.55, W*(0.01 + R()*0.05), R() < 0.5 ? '#ffb347' : '#ffd88a', 0.25 + R()*0.35);
     for (let i = 0; i < 9; i++){ // a row of diyas just above the calendar
-      const x = W*(0.08 + i*0.105), y = H*0.555;
+      const x = W*(0.08 + i*0.105), y = H*L.diyaY;
       glow(ctx, x, y - W*0.012, W*0.03, '#ffb347', 0.7);
       ctx.fillStyle = '#ffd88a'; ctx.beginPath(); ctx.ellipse(x, y - W*0.012, W*0.004, W*0.009, 0, 0, TAU); ctx.fill();
       ctx.fillStyle = '#9b4227'; ctx.beginPath(); ctx.ellipse(x, y, W*0.016, W*0.006, 0, 0, Math.PI); ctx.fill();
@@ -197,4 +217,4 @@ function caption(ctx, W, H, text){
   ctx.fillText(fit(ctx, text, W*0.86), W/2, H*0.958);
 }
 
-module.exports = { ZONES, drawYear, drawMonthWeek, scrim, vignette, festival, caption };
+module.exports = { LAYOUTS, layoutFor, drawYear, drawMonthWeek, scrim, vignette, festival, caption };

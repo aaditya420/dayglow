@@ -20,6 +20,23 @@ for (const style of STYLE_IDS){
   });
 }
 
+test('home screen layout renders every view, including six-row months', async () => {
+  for (const view of ['month', 'year', 'none']){
+    for (const date of ['2026-10-18', '2026-08-20']){
+      const out = await render(opts(`style=garden&screen=home&view=${view}&date=${date}&seed=3&label=1`));
+      assert.ok(out.body.subarray(0, 4).equals(PNG), `${view} ${date}`);
+    }
+  }
+});
+
+test('lock and home share the art for the same seed', async () => {
+  const lock = await render(opts('style=gallery&seed=4321'));
+  const home = await render(opts('style=gallery&seed=4321&screen=home'));
+  assert.equal(home.style, lock.style);
+  assert.equal(home.palette, lock.palette);
+  assert.ok(!home.body.equals(lock.body)); // same art, calendar in a different place
+});
+
 test('a pinned seed is reproducible; random pulls differ', async () => {
   const a = await render(opts('style=flow&seed=123'));
   const b = await render(opts('style=flow&seed=123'));

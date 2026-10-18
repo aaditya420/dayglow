@@ -12,6 +12,7 @@ test('defaults', () => {
   assert.equal(o.view, 'month');
   assert.equal(o.palette, 'auto');
   assert.equal(o.format, 'png');
+  assert.equal(o.screen, 'lock');
   assert.equal(o.tz, 'Asia/Kolkata');
   assert.equal(o.tzOffsetMin, 330);
   assert.equal(o.now.toISOString(), '2026-10-18T09:00:00.000Z');
@@ -20,11 +21,17 @@ test('defaults', () => {
 });
 
 test('unknown values fall back with a warning', () => {
-  const o = parse('style=nope&view=sideways&palette=neon');
+  const o = parse('style=nope&view=sideways&palette=neon&screen=watch');
   assert.equal(o.style, 'shapes');
   assert.equal(o.view, 'month');
   assert.equal(o.palette, 'auto');
-  assert.equal(o.warnings.length, 3);
+  assert.equal(o.screen, 'lock');
+  assert.equal(o.warnings.length, 4);
+});
+
+test('screen option', () => {
+  assert.equal(parse('').screen, 'lock');
+  assert.equal(parse('screen=HOME').screen, 'home');
 });
 
 test('sizes and coordinates are clamped', () => {

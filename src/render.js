@@ -36,12 +36,12 @@ async function render(o){
   const P = pickPalette(o.palette, R, now, o.tod);
   const hol = loadHolidays(o.holidays);
   const todayHoliday = hol.name(cal.y, cal.m, cal.d);
-  const zone = overlays.ZONES[o.view];
+  const L = overlays.layoutFor(o.screen), zone = L.zones[o.view];
 
   const I = {
     ...cal, now, hol, todayHoliday, view: o.view,
     zone: zone && { y0: zone[0]*H, y1: zone[1]*H },
-    horizon: o.view === 'none' ? H*0.8 : H*0.565,
+    horizon: o.view === 'none' ? H*0.8 : H*L.horizon, screen: o.screen,
     monthProg: cal.d/cal.dim, yearProg: cal.doy/cal.total,
     lat: o.lat, lon: o.lon, tzOffsetMin: o.tzOffsetMin,
     isHoliday: i => hol.isYearDay(cal.y, i),
@@ -54,13 +54,14 @@ async function render(o){
   const detail = S.render(ctx, W, H, R, P, I);
 
   ctx.globalAlpha = 1; ctx.shadowBlur = 0; ctx.globalCompositeOperation = 'source-over';
-  if (o.festive) overlays.festival(ctx, W, H, R, todayHoliday);
+  if (o.festive) overlays.festival(ctx, W, H, R, todayHoliday, L);
   overlays.scrim(ctx, W, H, P, zone, o.scrim ?? (style === 'shapes' ? 0 : 0.85));
   overlays.vignette(ctx, W, H);
-  if (o.view === 'month') overlays.drawMonthWeek(ctx, W, H, I);
-  else if (o.view === 'year') overlays.drawYear(ctx, W, H, I);
+  if (o.view === 'month') overlays.drawMonthWeek(ctx, W, H, I, L);
+  else if (o.view === 'year') overlays.drawYear(ctx, W, H, I, L);
 
-  if (o.label ?? gallery){
+  // The home screen dock covers the caption spot, so captions are lock-screen only.
+  if (L.caption && (o.label ?? gallery)){
     const parts = [gallery ? `No. ${cal.doy} · ${S.name}` : S.name];
     if (detail) parts.push(detail);
     if (todayHoliday && o.festive) parts.push(todayHoliday);

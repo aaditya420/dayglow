@@ -2,6 +2,13 @@
 
 All notable changes to this project are documented here. The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and the project uses [Semantic Versioning](https://semver.org/).
 
+## [1.1.0] - 2026-10-18
+
+### Added
+
+- `screen=home` layout, with `/home.png` and `/home-year.png` shortcuts. The calendar sits between a row of widgets and the page dots, and the footer and caption are left out because the dock covers them.
+- README steps for matching lock and home screens with a shared seed.
+
 ## [1.0.0] - 2026-10-18
 
 ### Added
