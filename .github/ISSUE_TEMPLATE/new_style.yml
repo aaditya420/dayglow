@@ -1,0 +1,17 @@
+name: New art style or holiday calendar
+description: Propose a style for the gallery or holidays for another country.
+labels: [style]
+body:
+  - type: textarea
+    id: concept
+    attributes:
+      label: Concept
+      description: What it looks like and what in it changes with the date. Sketches or references welcome.
+    validations:
+      required: true
+  - type: checkboxes
+    id: help
+    attributes:
+      label: Contribution
+      options:
+        - label: I'd like to build this myself

@@ -1,0 +1,11 @@
+name: Feature request
+description: Suggest an improvement or a new option.
+labels: [enhancement]
+body:
+  - type: textarea
+    id: idea
+    attributes:
+      label: The idea
+      description: What would you like Dayglow to do, and why would it be useful?
+    validations:
+      required: true

@@ -1,0 +1,93 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  test:
+    name: Lint and test
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run lint
+      - run: npm test
+        env:
+          WALLPAPER_OFFLINE: '1'
+      - name: Audit production dependencies
+        run: npm audit --omit=dev --audit-level=high
+
+  deploy:
+    name: Deploy to Vercel
+    needs: test
+    # Forks never get secrets, so only deploy pushes, manual runs and PRs from branches in this repo.
+    if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && 'production' || 'preview' }}
+      url: ${{ steps.deploy.outputs.url }}
+    env:
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+      VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+      VERCEL_CLI: vercel@62.1.0
+      TARGET: ${{ github.ref == 'refs/heads/main' && github.event_name != 'pull_request' && 'production' || 'preview' }}
+    steps:
+      - name: Check for Vercel secrets
+        id: gate
+        run: |
+          if [ -n "$VERCEL_TOKEN" ] && [ -n "$VERCEL_ORG_ID" ] && [ -n "$VERCEL_PROJECT_ID" ]; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Deploy skipped::Add VERCEL_TOKEN, VERCEL_ORG_ID and VERCEL_PROJECT_ID as repository secrets to enable deploys."
+          fi
+
+      - uses: actions/checkout@v4
+        if: steps.gate.outputs.enabled == 'true'
+
+      - uses: actions/setup-node@v4
+        if: steps.gate.outputs.enabled == 'true'
+        with:
+          node-version-file: .nvmrc
+
+      - name: Deploy (${{ env.TARGET }})
+        id: deploy
+        if: steps.gate.outputs.enabled == 'true'
+        run: |
+          set -euo pipefail
+          args=(deploy --yes --token "$VERCEL_TOKEN")
+          if [ "$TARGET" = "production" ]; then args+=(--prod); fi
+          url="$(npx --yes "$VERCEL_CLI" "${args[@]}")"
+          echo "url=$url" >> "$GITHUB_OUTPUT"
+          {
+            echo "### Deployed to $TARGET"
+            echo
+            echo "$url"
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Smoke test production
+        if: steps.gate.outputs.enabled == 'true' && env.TARGET == 'production' && vars.PRODUCTION_URL != ''
+        env:
+          PRODUCTION_URL: ${{ vars.PRODUCTION_URL }}
+        run: |
+          set -euo pipefail
+          type="$(curl -fsS --retry 3 --retry-delay 5 -o /dev/null -w '%{content_type}' "${PRODUCTION_URL%/}/api/wallpaper?w=300&h=650&seed=1")"
+          echo "content-type: $type"
+          case "$type" in image/png*) ;; *) echo "::error::Expected image/png, got $type"; exit 1 ;; esac

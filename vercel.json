@@ -1,0 +1,22 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "functions": {
+    "api/wallpaper.js": {
+      "memory": 1024,
+      "maxDuration": 20,
+      "includeFiles": "{src/**,data/**,node_modules/@expo-google-fonts/manrope/{500Medium,600SemiBold,700Bold}/*.ttf,node_modules/d3-celestial/data/{stars.6,constellations.lines,mw}.json}"
+    }
+  },
+  "rewrites": [
+    { "source": "/month.png", "destination": "/api/wallpaper?view=month" },
+    { "source": "/year.png", "destination": "/api/wallpaper?view=year" },
+    { "source": "/art.png", "destination": "/api/wallpaper?style=gallery" },
+    { "source": "/", "destination": "/api/wallpaper?view=month" }
+  ],
+  "headers": [
+    { "source": "/(.*)", "headers": [
+      { "key": "X-Content-Type-Options", "value": "nosniff" },
+      { "key": "Referrer-Policy", "value": "no-referrer" }
+    ] }
+  ]
+}
