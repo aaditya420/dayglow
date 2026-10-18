@@ -4,6 +4,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [1.1.1] - 2026-10-18
 
+### Fixed
+
+- Ground-line styles (arcade, city, garden, tide, sky) now end at the bottom of the clock on the lock screen and at the bottom of a widget row on the home screen, leaving a gap above the calendar instead of touching its header.
+
 ### Removed
 
 - The `/home.png` and `/home-year.png` paths. Add `screen=home` to any URL instead, e.g. `/month.png?screen=home`.

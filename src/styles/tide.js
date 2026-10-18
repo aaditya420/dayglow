@@ -9,7 +9,7 @@ function tide(ctx, W, H, R, P, I){
   const phase = A.MoonPhase(when), illum = A.Illumination('Moon', when).phase_fraction;
   bgGradient(ctx, W, H, P);
   starDust(ctx, W, H, R, 220, '#e6ecff', 0, 0.5);
-  const wy = H*(0.53 - 0.14*illum), mx = W*(0.25 + R()*0.5), my = H*0.17;
+  const wy = I.horizon - H*(0.005 + 0.14*illum), mx = W*(0.25 + R()*0.5), my = H*0.17;
   drawMoon(ctx, mx, my, W*0.065, phase);
   const N = makeNoise(R);
   const sea = ctx.createLinearGradient(0, wy, 0, H); sea.addColorStop(0, mix(P.bg0, P.inks[0], 0.6)); sea.addColorStop(1, P.bg1);

@@ -83,7 +83,8 @@ function sky(ctx, W, H, R, P, I){
     ctx.fillStyle = rgba(col, 0.75); ctx.fillText(b, p[0] + W*0.014, p[1]);
   }
   // horizon hills
-  const N = makeNoise(R), hy = proj([Math.sin(A0), Math.cos(A0), 0])[1];
+  // the hills never dip below the art boundary, so their edge can't run through the calendar
+  const N = makeNoise(R), hy = Math.min(proj([Math.sin(A0), Math.cos(A0), 0])[1], I.horizon);
   ctx.fillStyle = P.bg1; ctx.beginPath(); ctx.moveTo(0, H);
   for (let x = 0; x <= W; x += W/80) ctx.lineTo(x, hy - H*0.02 - H*0.025*(N.fbm(x/W*3, 1.3, 3) + 0.5));
   ctx.lineTo(W, H); ctx.closePath(); ctx.fill();
