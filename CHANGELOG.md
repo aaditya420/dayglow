@@ -9,6 +9,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - CLAUDE.md with the project's engineering, commit and release rules.
 - CI checks that pull request titles and commits follow Conventional Commits; Dependabot now writes `chore(deps)` and `ci(deps)` messages.
 
+### Changed
+
+- `palette=auto` with `tod=1` (the default) now colours every hour of the day differently, darkest around 3 AM and brightest at noon, instead of falling back to the season's palette during the day. Use `tod=0` for the seasonal palettes. Pinned seeds keep their art but take the colours of the hour.
+
 ## [1.1.1] - 2026-10-18
 
 ### Fixed

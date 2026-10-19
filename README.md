@@ -64,8 +64,8 @@ Add query parameters to any of them, for example `/month.png?style=sky&lat=19.07
 | `view` | `month`, `year`, `none` | `month` | The calendar drawn over the art. `none` is art only. |
 | `screen` | `lock`, `home` | `lock` | `home` moves the calendar up into the space between a row of widgets and the page dots, and drops the footer and caption that the dock would cover. Styles with a ground line (`arcade`, `city`, `garden`, `tide`, `sky`) end at the bottom of the clock on `lock` and of the widget row on `home`, leaving a gap above the calendar. |
 | `seed` | `random`, `daily`, `hourly`, a number or any text | `random` | Random gives a new design each pull. Pin a number to keep one you like. |
-| `palette` | `auto`, `random`, `midnight`, `ember`, `ocean`, `forest`, `rose`, `violet`, `mono`, `dawn` | `auto` | `auto` follows the season and the time of day. |
-| `tod` | `1`, `0` | `1` | With `palette=auto`, shift colours for dawn, dusk and night. |
+| `palette` | `auto`, `random`, `midnight`, `ember`, `ocean`, `forest`, `rose`, `violet`, `mono`, `dawn` | `auto` | `auto` follows the hour of the day (or the season, with `tod=0`). |
+| `tod` | `1`, `0` | `1` | With `palette=auto`, colour by the local hour: every hour has its own blend, darkest around 3 AM and brightest at noon, through dawn, golden hour and dusk. `0` uses a palette for the season instead. |
 | `festive` | `1`, `0` | `1` | Holiday decorations. |
 | `label` | `1`, `0` | on for `gallery` | A small caption with the style, details and seed. |
 | `scrim` | `0` to `1` | `0.85` (`0` for `shapes`) | How much the art is darkened behind the calendar. |
