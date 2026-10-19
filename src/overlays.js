@@ -4,10 +4,14 @@ const { TAU, rgba, glyph, rrect, glow } = require('./core');
 const { FAMILY: FONT } = require('./fonts');
 const { D } = require('./time');
 
+// Calendar colours. Every text colour keeps at least 4.5:1 contrast on the scrim at any hour
+// (test/overlays.test.js); past days are bold and brighter, days to come lighter in weight.
 const C = Object.freeze({
-  past: '#8a9ab3', future: '#1f4a55', futureText: '#3a6773', today: '#f0c76a',
-  text: '#c6d1e2', dim: '#6f8098', band: 'rgba(135,150,174,0.08)', holiday: '#e8907f',
+  past: '#d2dbe8', future: '#7b9bb0', futureText: '#a3b7c8', today: '#f5cd70',
+  text: '#f1f4f9', dim: '#aebbcc', band: 'rgba(170,186,210,0.12)', holiday: '#ff9e8b',
 });
+/** A soft dark halo behind calendar text so it stays readable over busy art. */
+function halo(ctx, W){ ctx.shadowColor = 'rgba(0,0,0,0.55)'; ctx.shadowBlur = W*0.007; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0; }
 const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 const SHORT_MONTHS = MONTHS.map(m => m.slice(0, 3));
 const DAYS = ['Monday','Tuesday','Wednesday','Thursday','Friday','Saturday','Sunday'];
@@ -40,17 +44,21 @@ const LAYOUTS = Object.freeze({
 const layoutFor = screen => LAYOUTS[screen] || LAYOUTS.lock;
 
 function header(ctx, W, left, sub, right, x0, x1, y){
+  ctx.save(); halo(ctx, W);
   const fs = Math.round(W*0.036);
   ctx.textBaseline = 'alphabetic'; ctx.textAlign = 'left';
   ctx.font = `700 ${fs}px ${FONT}`; ctx.fillStyle = C.text; ctx.fillText(left, x0, y);
   const lw = ctx.measureText(left).width;
   ctx.font = `600 ${Math.round(fs*0.62)}px ${FONT}`; ctx.fillStyle = C.dim; ctx.fillText(spaced(sub), x0 + lw + fs*0.45, y);
   ctx.textAlign = 'right'; ctx.font = `700 ${fs}px ${FONT}`; ctx.fillStyle = C.text; ctx.fillText(right, x1, y);
+  ctx.restore();
 }
 function footer(ctx, W, H, text){
+  ctx.save(); halo(ctx, W);
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
   ctx.font = `600 ${Math.round(W*0.028)}px ${FONT}`; ctx.fillStyle = C.dim;
   ctx.fillText(text, W/2, H*0.908); // sits between the flashlight and camera buttons
+  ctx.restore();
 }
 function fit(ctx, text, maxW){
   if (ctx.measureText(text).width <= maxW) return text;
@@ -76,7 +84,7 @@ function drawYear(ctx, W, H, I, L = LAYOUTS.lock){
       continue;
     }
     const past = i + 1 < day, isHol = hol.isYearDay(y, i);
-    ctx.globalAlpha = isHol ? (past ? 0.55 : 0.95) : past ? 0.9 : 0.75;
+    ctx.globalAlpha = isHol ? (past ? 0.7 : 1) : past ? 0.95 : 0.85;
     ctx.strokeStyle = isHol ? C.holiday : past ? C.past : C.future;
     ctx.lineWidth = cell*(past || isHol ? 0.075 : 0.06);
     glyph(ctx, type, cx, cy, r);
@@ -93,6 +101,7 @@ function drawMonthWeek(ctx, W, H, I, L = LAYOUTS.lock){
   const gW = W*0.78, gLeft = (W - gW)/2, cw = gW/7, x0 = gLeft + cw*0.12, x1 = gLeft + gW - cw*0.12;
   const M = L.month, top = H*M.top, labelH = H*M.labelH, ch = H*(rows === 6 ? M.row6 : M.row);
   const gridTop = top + labelH, gridBottom = gridTop + rows*ch, type = m % 4;
+  ctx.save(); halo(ctx, W);
 
   header(ctx, W, MONTHS[m], `DAY ${d} OF ${dim}`, (d/dim*100).toFixed(1) + '%', x0, x1, top - H*0.012);
   ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -111,7 +120,7 @@ function drawMonthWeek(ctx, W, H, I, L = LAYOUTS.lock){
       glyph(ctx, type, cx, cy + (type === 0 ? -ch*0.04 : 0), ch*0.56); ctx.restore();
       ctx.font = `700 ${nfs}px ${FONT}`; ctx.fillStyle = C.today;
     } else if (isHol){
-      ctx.font = `700 ${nfs}px ${FONT}`; ctx.fillStyle = C.holiday; ctx.globalAlpha = i < d ? 0.6 : 1;
+      ctx.font = `700 ${nfs}px ${FONT}`; ctx.fillStyle = C.holiday; ctx.globalAlpha = i < d ? 0.75 : 1;
     } else {
       ctx.font = `${i < d ? 700 : 500} ${nfs}px ${FONT}`; ctx.fillStyle = i < d ? C.past : C.futureText;
     }
@@ -152,19 +161,28 @@ function drawMonthWeek(ctx, W, H, I, L = LAYOUTS.lock){
       ctx.fillText(LETTERS[i], x0 + i*(segW + segGap) + segW/2, sy + segH + H*0.016);
     }
   }
+  ctx.restore();
   const leftM = dim - d;
   if (L.footer) footer(ctx, W, H, leftM === 0 ? 'Last day of the month' : `${leftM} ${leftM === 1 ? 'day' : 'days'} left in ${MONTHS[m]}`);
 }
 
+/** How far the scrim fades out above and below the calendar zone, as fractions of the height. */
+const SCRIM_FEATHER = Object.freeze({ top: 0.2, bottom: 0.12 });
 /** Darken the art behind the calendar so text stays readable on busy styles. */
 function scrim(ctx, W, H, P, zone, s){
   if (!(s > 0)) return;
   ctx.fillStyle = `rgba(0,0,0,${0.16*s})`; ctx.fillRect(0, 0, W, H);
   if (!zone) return;
-  const a = zone[0]*H - H*0.05, b = zone[1]*H + H*0.03, g = ctx.createLinearGradient(0, a, 0, b);
-  g.addColorStop(0, rgba(P.bg1, 0)); g.addColorStop(0.18, rgba(P.bg1, 0.78*s));
-  g.addColorStop(0.85, rgba(P.bg1, 0.78*s)); g.addColorStop(1, rgba(P.bg1, 0));
-  ctx.fillStyle = g; ctx.fillRect(0, a, W, b - a);
+  // Full strength over the zone, fading out above and below along a smoothstep curve so the
+  // band has no visible edge.
+  const y0 = zone[0]*H, y1 = zone[1]*H, a = Math.max(0, y0 - H*SCRIM_FEATHER.top), b = Math.min(H, y1 + H*SCRIM_FEATHER.bottom);
+  const g = ctx.createLinearGradient(0, a, 0, b), span = b - a, peak = 0.78*s;
+  for (let k = 0; k <= 16; k++){
+    const t = k/16, e = t*t*(3 - 2*t);
+    g.addColorStop((t*(y0 - a))/span, rgba(P.bg1, peak*e));
+    g.addColorStop((y1 - a + (1 - t)*(b - y1))/span, rgba(P.bg1, peak*e));
+  }
+  ctx.fillStyle = g; ctx.fillRect(0, a, W, span);
 }
 function vignette(ctx, W, H){
   const v = ctx.createRadialGradient(W/2, H/2, H*0.35, W/2, H/2, H*0.72);
@@ -216,8 +234,8 @@ function festival(ctx, W, H, R, name, L = LAYOUTS.lock){
 /** Small caption above the home indicator. */
 function caption(ctx, W, H, text){
   ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
-  ctx.font = `600 ${Math.round(W*0.02)}px ${FONT}`; ctx.fillStyle = 'rgba(198,209,226,0.55)';
+  ctx.font = `600 ${Math.round(W*0.02)}px ${FONT}`; ctx.fillStyle = 'rgba(225,232,242,0.72)';
   ctx.fillText(fit(ctx, text, W*0.86), W/2, H*0.958);
 }
 
-module.exports = { LAYOUTS, layoutFor, drawYear, drawMonthWeek, scrim, vignette, festival, caption };
+module.exports = { C, SCRIM_FEATHER, LAYOUTS, layoutFor, drawYear, drawMonthWeek, scrim, vignette, festival, caption };
