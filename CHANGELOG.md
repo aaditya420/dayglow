@@ -4,6 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+### Fixed
+
+- Calendar text is brighter and has a soft shadow, so upcoming days, labels and the year view's future symbols stay readable over the dark band at every hour (upcoming days went from about 2:1 to at least 6:1 contrast).
+- The dark band behind the calendar fades in and out along a smooth curve over a longer distance, so its edge no longer shows as a line across the art.
+
 ### Added
 
 - CLAUDE.md with the project's engineering, commit and release rules.
