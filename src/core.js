@@ -47,15 +47,39 @@ const PALETTES = {
 };
 /** Indian seasons: winter, spring, summer, monsoon, festive autumn. */
 const SEASON = m => (m === 11 || m <= 1) ? 'violet' : m <= 3 ? 'rose' : m <= 5 ? 'ember' : m <= 8 ? 'forest' : 'midnight';
+// Time-of-day keyframes. Brightness bottoms out in the small hours and peaks at noon;
+// bg1 stays dark at every hour because the calendar scrim is drawn with it.
+const DAY_KEYS = [
+  { h: 0,  name: 'Midnight',    bg0: '#030b18', bg1: '#010308', inks: ['#17384a', '#264f66', '#4a6c94', '#8ea4c4'], accent: '#e8c46a' },
+  { h: 3,  name: 'Small Hours', bg0: '#02060f', bg1: '#000205', inks: ['#152c40', '#213f5a', '#3f5a82', '#7c90b4'], accent: '#d9b866' },
+  { h: 5,  name: 'First Light', bg0: '#120f2a', bg1: '#04030c', inks: ['#3a3168', '#6a4f86', '#a8708a', '#dca68a'], accent: '#ffcf9a' },
+  { h: 7,  name: 'Dawn',        bg0: '#3a2240', bg1: '#0c0812', inks: ['#6a4068', '#b0647a', '#ec9a78', '#ffd29a'], accent: '#fff0c0' },
+  { h: 9,  name: 'Morning',     bg0: '#24547a', bg1: '#0a1826', inks: ['#2f6f94', '#4f97b8', '#8cc6d8', '#e2f2f2'], accent: '#ffe6a0' },
+  { h: 12, name: 'Noon',        bg0: '#2f6fa6', bg1: '#0e2236', inks: ['#3c86b8', '#62a8d4', '#a2d2ec', '#f2fbff'], accent: '#ffe9a6' },
+  { h: 15, name: 'Afternoon',   bg0: '#2a5f8a', bg1: '#0d1e30', inks: ['#3a7a9c', '#6aa2b4', '#c0c8a0', '#f6e6b4'], accent: '#ffd88a' },
+  { h: 16, name: 'Late Afternoon', bg0: '#5a4a52', bg1: '#120d12', inks: ['#7a5a5a', '#b07a62', '#e0aa78', '#fadcae'], accent: '#ffe0a0' },
+  { h: 17, name: 'Golden Hour', bg0: '#5a3418', bg1: '#140904', inks: ['#8a4a22', '#c26f32', '#eba052', '#ffd890'], accent: '#fff0b8' },
+  { h: 18, name: 'Dusk',        bg0: '#3c1830', bg1: '#0e050c', inks: ['#6e2a4c', '#a8466a', '#dc7a7a', '#f8b89a'], accent: '#ffd6a0' },
+  { h: 20, name: 'Evening',     bg0: '#120c2c', bg1: '#04030c', inks: ['#2f2a6a', '#4c3f9e', '#7e6cd2', '#bcaaff'], accent: '#ffd98a' },
+  { h: 22, name: 'Night',       bg0: '#050f26', bg1: '#01040b', inks: ['#1c3f55', '#2b5a70', '#5476a0', '#98acca'], accent: '#f0c76a' },
+];
+/** The palette for a wall-clock hour (0–23), blended between the keyframes on either side. */
+function hourPalette(hr){
+  const h = ((Math.floor(hr) % 24) + 24) % 24;
+  let i = DAY_KEYS.length - 1;
+  while (DAY_KEYS[i].h > h) i--;
+  const a = DAY_KEYS[i], b = DAY_KEYS[(i + 1) % DAY_KEYS.length];
+  const span = (b.h > a.h ? b.h : b.h + 24) - a.h, t = (h - a.h)/span;
+  return {
+    name: t < 0.5 ? a.name : b.name,
+    bg0: mix(a.bg0, b.bg0, t), bg1: mix(a.bg1, b.bg1, t),
+    inks: a.inks.map((c, k) => mix(c, b.inks[k], t)), accent: mix(a.accent, b.accent, t),
+  };
+}
 function pickPalette(name, R, now, tod){
   if (PALETTES[name]) return PALETTES[name];
   if (name === 'random'){ const k = Object.keys(PALETTES); return PALETTES[k[Math.floor(R() * k.length)]]; }
-  const hr = now.getUTCHours(); // wall-clock hour in the chosen zone
-  if (tod){
-    if (hr >= 5 && hr < 8) return PALETTES.dawn;
-    if (hr >= 17 && hr < 19) return PALETTES.ember;
-    if (hr >= 19 || hr < 5) return PALETTES.midnight;
-  }
+  if (tod) return hourPalette(now.getUTCHours()); // wall-clock hour in the chosen zone
   return PALETTES[SEASON(now.getUTCMonth())];
 }
 
@@ -92,4 +116,4 @@ function starDust(ctx, W, H, R, n, color, y0 = 0, y1 = 1){
   ctx.globalAlpha = 1;
 }
 
-module.exports = { TAU, rng, hash, shuffle, makeNoise, PALETTES, pickPalette, rgba, mix, hexToRgb, glyph, rrect, bgGradient, glow, starDust };
+module.exports = { TAU, rng, hash, shuffle, makeNoise, PALETTES, pickPalette, hourPalette, rgba, mix, hexToRgb, glyph, rrect, bgGradient, glow, starDust };
