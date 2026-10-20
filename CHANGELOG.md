@@ -6,7 +6,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
-- A release workflow tags each dated version in the changelog once it reaches `main` and publishes its GitHub release with those notes. Its first run backfills v1.0.0 to v1.2.0.
+- A release workflow tags each dated version in the changelog once it reaches `main` and publishes its GitHub release with those notes. Its first runs backfilled tags for v1.0.0 to v1.2.0.
 
 ## [1.2.0] - 2026-10-20
 

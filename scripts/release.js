@@ -5,16 +5,6 @@
 const { execFileSync } = require('child_process');
 const fs = require('fs');
 
-// Versions released before this workflow existed, pinned to the commit each changelog section describes.
-// GitHub refuses (403) a tag from the workflow token when the commit's workflow files match no other
-// branch or tag. The initial commit (a63ea0b) predates Dependabot's action bumps, so 1.0.0 sits on the
-// last 1.0.0 commit (95cb24c): the same app code, plus dev-only ESLint and CI action updates.
-const HISTORICAL = Object.freeze({
-  '1.0.0': '95cb24cebe6fb8dcb7891c7f652d5b836996f291',
-  '1.1.0': 'e85649fbac398b5cc3f7bbbab26e54db6130bced',
-  '1.1.1': '2e8984e82570c338c10a089e6befe35bac0d31f7',
-});
-
 const HEADING = /^## \[(\d+\.\d+\.\d+)\] - (\d{4}-\d{2}-\d{2})[ \t]*$/gm;
 
 /** Dated release sections of a Keep a Changelog file, oldest first: [{ version, date, notes }]. */
@@ -55,16 +45,6 @@ async function createRelease({ repo, token, tag, target, title, notes, latest },
   return (await res.json()).html_url;
 }
 
-/**
- * How a refused release is reported: an error that fails the job, or, for a pre-workflow version, a warning,
- * so a backfill problem can't keep every push to main red. Annotations stay visible in the checks API.
- */
-function failure(version, err){
-  const fatal = !Object.hasOwn(HISTORICAL, version);
-  const hint = / 403:/.test(err.message) ? ' The workflow token cannot tag a commit whose workflow files match no other branch or tag; pin a nearby commit or tag it by hand.' : '';
-  return { fatal, line: `::${fatal ? 'error' : 'warning'} title=Release v${version}::${String(err.message).replace(/\r?\n/g, ' ')}${hint}` };
-}
-
 async function main(){
   const dry = process.argv.includes('--dry-run');
   const { GITHUB_TOKEN: token, GITHUB_REPOSITORY: repo, GITHUB_STEP_SUMMARY: summary } = process.env;
@@ -79,7 +59,7 @@ async function main(){
   for (const r of releases){
     const tag = `v${r.version}`;
     if (tags.has(tag)) continue;
-    const target = HISTORICAL[r.version] || bumpCommit(r.version, git);
+    const target = bumpCommit(r.version, git);
     if (!target){ console.log(`::warning::No commit on main sets package.json to ${r.version}; skipped ${tag}.`); continue; }
     console.log(`${dry ? 'Would release' : 'Releasing'} ${tag} at ${target.slice(0, 7)}`);
     made++;
@@ -90,9 +70,10 @@ async function main(){
       console.log(`  ${url}`);
       if (summary) fs.appendFileSync(summary, `- [${tag}](${url}) at \`${target.slice(0, 7)}\`\n`);
     } catch (err){
-      const { fatal, line } = failure(r.version, err);
-      if (fatal) failed++;
-      console.log(line);
+      failed++;
+      // GitHub refuses (403) a tag from the workflow token on a commit whose workflow files match no other ref.
+      const hint = / 403:/.test(err.message) ? ' The workflow token cannot tag a commit whose workflow files match no other branch or tag; tag it by hand.' : '';
+      console.log(`::error title=Release ${tag}::${String(err.message).replace(/\r?\n/g, ' ')}${hint}`);
     }
   }
   if (!made) console.log('Every dated version in CHANGELOG.md is already tagged.');
@@ -100,4 +81,4 @@ async function main(){
 }
 
 if (require.main === module) main().catch(err => { console.log(`::error title=Release::${err.message}`); process.exitCode = 1; });
-module.exports = { parseChangelog, bumpCommit, createRelease, failure, HISTORICAL };
+module.exports = { parseChangelog, bumpCommit, createRelease };
