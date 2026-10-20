@@ -1,0 +1,35 @@
+name: Release
+
+# Tags and publishes a GitHub release for each dated version in CHANGELOG.md that has no tag yet.
+# Merging a `chore(release): X.Y.Z` pull request is all it takes; see "Versioning and releases" in CLAUDE.md.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    name: Tag and publish releases
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # full history and tags, to find each version's commit and skip versions already tagged
+          fetch-depth: 0
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+      - name: Release untagged versions
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/release.js
