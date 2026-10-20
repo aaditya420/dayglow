@@ -238,4 +238,4 @@ function caption(ctx, W, H, text){
   ctx.fillText(fit(ctx, text, W*0.86), W/2, H*0.958);
 }
 
-module.exports = { C, SCRIM_FEATHER, LAYOUTS, layoutFor, drawYear, drawMonthWeek, scrim, vignette, festival, caption };
+module.exports = { C, LAYOUTS, layoutFor, drawYear, drawMonthWeek, scrim, vignette, festival, caption };

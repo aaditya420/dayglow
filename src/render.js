@@ -39,10 +39,10 @@ async function render(o){
   const L = overlays.layoutFor(o.screen), zone = L.zones[o.view];
 
   const I = {
-    ...cal, now, hol, todayHoliday, view: o.view,
+    ...cal, now, hol, todayHoliday,
     zone: zone && { y0: zone[0]*H, y1: zone[1]*H },
-    horizon: o.view === 'none' ? H*0.8 : H*L.horizon, screen: o.screen,
-    monthProg: cal.d/cal.dim, yearProg: cal.doy/cal.total,
+    horizon: o.view === 'none' ? H*0.8 : H*L.horizon,
+    monthProg: cal.d/cal.dim,
     lat: o.lat, lon: o.lon, tzOffsetMin: o.tzOffsetMin,
     isHoliday: i => hol.isYearDay(cal.y, i),
     isHolidayDate: (y, m, d) => Boolean(hol.name(y, m, d)),

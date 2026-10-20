@@ -42,4 +42,4 @@ function main(){
 }
 
 if (require.main === module) main();
-module.exports = { checkHeader, TYPES, MAX_HEADER };
+module.exports = { checkHeader };

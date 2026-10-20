@@ -86,4 +86,4 @@ function parseOptions(q, env = process.env, instant = new Date()){
   };
 }
 
-module.exports = { parseOptions, defaults, LIMITS, VIEWS, SCREENS, PALETTE_NAMES, FORMATS };
+module.exports = { parseOptions, defaults, LIMITS };

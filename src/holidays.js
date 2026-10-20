@@ -18,7 +18,6 @@ function loadHolidays(code = 'IN'){
   }
   const keys = Object.keys(dates).sort();
   const cal = {
-    code: id,
     /** Holiday name for a date, or null. Day may overflow the month. */
     name: (y, m, d) => dates[dayKey(y, m, d)] || null,
     /** True when the i-th day of year y (0-based) is a holiday. */

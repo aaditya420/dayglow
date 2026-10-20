@@ -42,4 +42,4 @@ function calendar(now){
   return { y, m, d, doy, total, dim, week: isoWeek(now), weekday: (now.getUTCDay() + 6) % 7 };
 }
 
-module.exports = { pad2, D, keyOf, dayKey, isValidTimeZone, nowIn, isoWeek, calendar };
+module.exports = { D, keyOf, dayKey, isValidTimeZone, nowIn, isoWeek, calendar };
