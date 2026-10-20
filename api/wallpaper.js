@@ -33,6 +33,10 @@ module.exports = async function handler(req, res){
     return res.end(req.method === 'HEAD' ? undefined : out.body);
   } catch (err){
     console.error('render failed', err);
+    if (res.headersSent) return res.end();
+    // Drop the image headers set before the failure, or the error body goes out with the PNG's length.
+    for (const name of res.getHeaderNames()) res.removeHeader(name);
+    res.setHeader('X-Content-Type-Options', 'nosniff');
     res.statusCode = 500;
     res.setHeader('Content-Type', 'text/plain; charset=utf-8');
     res.setHeader('Cache-Control', 'no-store');

@@ -29,6 +29,13 @@ test('unknown values fall back with a warning', () => {
   assert.equal(o.warnings.length, 4);
 });
 
+test('warnings quote unknown values in printable ASCII only', () => {
+  const o = parse('style=%F0%9F%98%80&view=a%0D%0Ab&palette=caf%C3%A9&screen=%00');
+  assert.equal(o.warnings.length, 4);
+  for (const w of o.warnings) assert.match(w, /^[\x20-\x7e]+$/);
+  assert.equal(o.warnings[2], 'unknown palette "caf?"');
+});
+
 test('screen option', () => {
   assert.equal(parse('').screen, 'lock');
   assert.equal(parse('screen=HOME').screen, 'home');

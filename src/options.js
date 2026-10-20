@@ -13,6 +13,8 @@ const PALETTE_NAMES = ['auto', 'random', ...Object.keys(PALETTES)];
 const DATE_RE = /^([0-9]{4})-([0-9]{2})-([0-9]{2})(?:T([0-9]{2})(?::([0-9]{2}))?)?$/;
 
 const clamp = (n, lo, hi) => Math.min(hi, Math.max(lo, n));
+/** Unknown values are quoted back in the X-Wallpaper-Warning header, which only carries printable ASCII. */
+const quote = v => `"${v.slice(0, 20).replace(/[^\x20-\x7e]/g, '?')}"`;
 function number(v, def, lo, hi, float = false){
   if (v == null || v === '') return def;
   const n = float ? Number.parseFloat(v) : Number.parseInt(v, 10);
@@ -59,10 +61,10 @@ function parseOptions(q, env = process.env, instant = new Date()){
   const screen = String(q.get('screen') || 'lock').toLowerCase();
   const seed = q.get('seed');
   const warnings = [];
-  if (!(style === 'gallery' || style === 'random' || STYLE_IDS.includes(style))) warnings.push(`unknown style "${style.slice(0, 20)}"`);
-  if (!VIEWS.includes(view)) warnings.push(`unknown view "${view.slice(0, 20)}"`);
-  if (!PALETTE_NAMES.includes(palette)) warnings.push(`unknown palette "${palette.slice(0, 20)}"`);
-  if (!SCREENS.includes(screen)) warnings.push(`unknown screen "${screen.slice(0, 20)}"`);
+  if (!(style === 'gallery' || style === 'random' || STYLE_IDS.includes(style))) warnings.push(`unknown style ${quote(style)}`);
+  if (!VIEWS.includes(view)) warnings.push(`unknown view ${quote(view)}`);
+  if (!PALETTE_NAMES.includes(palette)) warnings.push(`unknown palette ${quote(palette)}`);
+  if (!SCREENS.includes(screen)) warnings.push(`unknown screen ${quote(screen)}`);
 
   return {
     style: STYLE_IDS.includes(style) || style === 'gallery' || style === 'random' ? style : 'shapes',
