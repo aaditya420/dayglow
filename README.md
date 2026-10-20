@@ -91,7 +91,7 @@ Invalid values never fail the request: they fall back to defaults and are listed
 
 | `style` | Name | What changes with the date |
 | --- | --- | --- |
-| `shapes` | Shapes | Scattered PlayStation-style symbols. |
+| `shapes` | Shapes | Scattered triangles, circles, crosses and squares. |
 | `orbits` | Orbits | A marker travels the outer orbit as the month passes. |
 | `flow` | Flow Field | Thousands of lines following an invisible current. |
 | `topo` | Topography | Map-style contour lines. |
@@ -123,7 +123,7 @@ All optional, set as Vercel environment variables. None of them are secrets.
 
 ### Holidays
 
-`data/holidays/IN.json` lists India's 17 gazetted Central Government holidays for 2026 and 2027, from the DoPT lists. To add another country, create `data/holidays/<ISO code>.json` with the same shape and set `WALLPAPER_HOLIDAYS`. Pull requests with new calendars or new years are very welcome.
+`data/holidays/IN.json` lists India's 17 gazetted Central Government holidays for 2026 and 2027, from the DoPT lists. From 2028 the holiday marks and the next-holiday line stay empty until that year's list is added. To add another country, create `data/holidays/<ISO code>.json` with the same shape and set `WALLPAPER_HOLIDAYS`. Pull requests with new calendars or new years are very welcome.
 
 ## Local development
 
@@ -175,6 +175,7 @@ If you also connected the repository through Vercel's Git integration, disable o
 - A full-size render takes about 0.2–1 s depending on the style. PNG encoding is the largest cost for busy styles, so `format=jpg` is the fastest option.
 - Image size is capped at 2000 × 4400 to keep memory and run time bounded.
 - Random pulls are sent with `Cache-Control: no-store`. Pinned seeds can be cached by Vercel's CDN until the next hour, which makes repeated pulls nearly free.
+- Every uncached pull runs the function and counts towards your Vercel plan's usage. If you share your deployment's URL publicly, add a rate-limit rule for `/api/wallpaper` under **Firewall** in your Vercel project, so other people's traffic can't use up your quota.
 
 ## Contributing
 
@@ -182,4 +183,4 @@ Ideas, new styles, holiday calendars and fixes are all welcome. Read [CONTRIBUTI
 
 ## License
 
-[MIT](LICENSE). Third-party data and fonts keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). PlayStation is a trademark of Sony Interactive Entertainment; the triangle, circle, cross and square shapes here are simple geometric drawings and the project is not affiliated with Sony.
+[MIT](LICENSE). Third-party data and fonts keep their own licenses; see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

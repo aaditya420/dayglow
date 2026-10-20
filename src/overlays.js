@@ -67,7 +67,7 @@ function fit(ctx, text, maxW){
   return t + '…';
 }
 
-/** 365-day grid of PlayStation-style symbols; the symbol changes with the month. */
+/** 365-day grid of geometric symbols; the symbol changes with the month. */
 function drawYear(ctx, W, H, I, L = LAYOUTS.lock){
   const { y, doy: day, total, hol } = I;
   const cols = 23, rows = Math.ceil(total/cols);

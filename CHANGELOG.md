@@ -4,8 +4,11 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-20
+
 ### Fixed
 
+- Unknown `style`, `view`, `palette` or `screen` values with emoji, accented or control characters (for example `?style=😀`) no longer fail the request. The warning header now quotes them in plain ASCII, and an error response no longer keeps the image's length and file name headers.
 - Calendar text is brighter and has a soft shadow, so upcoming days, labels and the year view's future symbols stay readable over the dark band at every hour (upcoming days went from about 2:1 to at least 6:1 contrast).
 - The dark band behind the calendar fades in and out along a smooth curve over a longer distance, so its edge no longer shows as a line across the art.
 
