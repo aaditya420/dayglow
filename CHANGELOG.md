@@ -4,6 +4,8 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ## [Unreleased]
 
+## [1.2.0] - 2026-10-20
+
 ### Fixed
 
 - Unknown `style`, `view`, `palette` or `screen` values with emoji, accented or control characters (for example `?style=😀`) no longer fail the request. The warning header now quotes them in plain ASCII, and an error response no longer keeps the image's length and file name headers.

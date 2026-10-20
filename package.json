@@ -1,15 +1,29 @@
 {
   "name": "dayglow",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Procedural iPhone lock screen wallpapers with your month, week and year progress, served as a PNG from one Vercel function.",
   "license": "MIT",
   "author": "Aaditya Verma (https://github.com/aaditya420)",
-  "repository": { "type": "git", "url": "git+https://github.com/aaditya420/dayglow.git" },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aaditya420/dayglow.git"
+  },
   "homepage": "https://github.com/aaditya420/dayglow#readme",
   "bugs": "https://github.com/aaditya420/dayglow/issues",
-  "keywords": ["wallpaper", "lock-screen", "ios", "shortcuts", "generative-art", "vercel", "canvas", "calendar"],
+  "keywords": [
+    "wallpaper",
+    "lock-screen",
+    "ios",
+    "shortcuts",
+    "generative-art",
+    "vercel",
+    "canvas",
+    "calendar"
+  ],
   "private": true,
-  "engines": { "node": ">=22 <23" },
+  "engines": {
+    "node": ">=22 <23"
+  },
   "scripts": {
     "lint": "eslint .",
     "test": "node --test",
