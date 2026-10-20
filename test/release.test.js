@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseChangelog, bumpCommit } = require('../scripts/release');
+const { parseChangelog, bumpCommit, createRelease } = require('../scripts/release');
 
 const CHANGELOG = `# Changelog
 
@@ -49,4 +49,21 @@ test('finds the first first-parent commit where package.json takes a version', (
   assert.equal(bumpCommit('1.2.0', git), 'c3');
   assert.equal(bumpCommit('1.0.0', git), 'a1');
   assert.equal(bumpCommit('9.9.9', git), null);
+});
+
+test('creates a release through the REST API with the tag, commit and notes', async () => {
+  let call;
+  const fetchStub = async (url, init) => { call = { url, init }; return { ok: true, status: 201, json: async () => ({ html_url: 'https://github.com/o/r/releases/tag/v1.2.0' }) }; };
+  const url = await createRelease({ repo: 'o/r', token: 't0k', tag: 'v1.2.0', target: 'bf18603', title: 'Dayglow 1.2.0', notes: '### Fixed', latest: true }, fetchStub);
+  assert.equal(url, 'https://github.com/o/r/releases/tag/v1.2.0');
+  assert.equal(call.url, 'https://api.github.com/repos/o/r/releases');
+  assert.equal(call.init.method, 'POST');
+  assert.equal(call.init.headers.authorization, 'Bearer t0k');
+  assert.deepEqual(JSON.parse(call.init.body), { tag_name: 'v1.2.0', target_commitish: 'bf18603', name: 'Dayglow 1.2.0', body: '### Fixed', make_latest: 'true' });
+});
+
+test('a refused release reports the status and GitHub message', async () => {
+  const fetchStub = async () => ({ ok: false, status: 403, text: async () => '{"message":"Resource not accessible by integration"}' });
+  await assert.rejects(createRelease({ repo: 'o/r', token: 't', tag: 'v1.0.0', target: 'a1', title: 'x', notes: 'y', latest: false }, fetchStub),
+    /403.*Resource not accessible by integration/);
 });
