@@ -1,5 +1,5 @@
 'use strict';
-// assemble: PlayStation symbols re-forming through the month
+// assemble: the four symbols re-forming through the month
 const { TAU, glyph, bgGradient } = require('../core');
 
 function assemble(ctx, W, H, R, P, I){

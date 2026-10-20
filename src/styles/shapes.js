@@ -1,5 +1,5 @@
 'use strict';
-// shapes: the original scattered PlayStation symbols
+// shapes: the original scattered symbols (triangle, circle, cross, square)
 const { glyph, bgGradient } = require('../core');
 
 function shapes(ctx, W, H, R, P, I){
