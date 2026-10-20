@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseChangelog, bumpCommit, createRelease, HISTORICAL } = require('../scripts/release');
+const { parseChangelog, bumpCommit, createRelease, failure, HISTORICAL } = require('../scripts/release');
 
 const CHANGELOG = `# Changelog
 
@@ -68,14 +68,29 @@ test('a refused release reports the status and GitHub message', async () => {
     /403.*Resource not accessible by integration/);
 });
 
-test('historical pins avoid commits that change workflow files', t => {
-  // The job's GITHUB_TOKEN is refused (403) when it tags a commit that edits .github/workflows.
+test('historical pins share their workflow files with another pin', t => {
+  // GitHub refuses (403) a tag made by the workflow token whose workflow files exist in no other ref.
   const { execFileSync } = require('node:child_process');
   const git = args => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
-  for (const [version, sha] of Object.entries(HISTORICAL)){
-    let files;
-    try { files = git(['show', '--format=', '--name-only', '--first-parent', sha]); } catch { t.diagnostic(`${sha} not in this clone; skipped`); continue; }
-    assert.ok(!/^\.github\/workflows\//m.test(files), `v${version} at ${sha.slice(0, 7)} changes workflow files`);
+  const workflows = sha => git(['ls-tree', '-r', sha, '--', '.github/workflows']).trim();
+  const pins = Object.entries(HISTORICAL);
+  for (const [version, sha] of pins){
+    let mine;
+    try { mine = workflows(sha); } catch { t.diagnostic(`${sha} not in this clone; skipped`); continue; }
+    const shared = pins.some(([v, other]) => v !== version && (() => { try { return workflows(other) === mine; } catch { return true; } })());
+    assert.ok(shared, `v${version} at ${sha.slice(0, 7)} has workflow files no other pin has`);
     assert.equal(JSON.parse(git(['show', `${sha}:package.json`])).version, version);
   }
+});
+
+test('a refused backfill only warns; a refused new release fails the job', () => {
+  const err = new Error('GitHub API 403: {"message":"Resource not accessible by integration"}');
+  const old = failure('1.0.0', err);
+  assert.equal(old.fatal, false);
+  assert.match(old.line, /^::warning title=Release v1\.0\.0::GitHub API 403/);
+  assert.match(old.line, /match no other branch or tag/);
+  const next = failure('9.9.9', new Error('GitHub API 422: {"message":"Validation Failed"}'));
+  assert.equal(next.fatal, true);
+  assert.match(next.line, /^::error title=Release v9\.9\.9::GitHub API 422/);
+  assert.doesNotMatch(next.line, /match no other branch/);
 });
