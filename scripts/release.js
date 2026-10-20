@@ -6,8 +6,10 @@ const { execFileSync } = require('child_process');
 const fs = require('fs');
 
 // Versions released before this workflow existed, pinned to the commit each changelog section describes.
+// The job's token is refused when it tags a commit that edits .github/workflows, so 1.0.0 sits on the
+// commit after the initial one (a63ea0b, which adds the workflows): same app code, ESLint 10.12.0 dev bump.
 const HISTORICAL = Object.freeze({
-  '1.0.0': 'a63ea0b38ed455dfde80db74b8b8b00cc286039a',
+  '1.0.0': '6d946598446c844318e1090205ddd95cc03bf097',
   '1.1.0': 'e85649fbac398b5cc3f7bbbab26e54db6130bced',
   '1.1.1': '2e8984e82570c338c10a089e6befe35bac0d31f7',
 });
@@ -79,7 +81,8 @@ async function main(){
     } catch (err){
       failed++;
       // An annotation keeps the reason visible on the run page and in the checks API.
-      console.log(`::error title=Release ${tag}::${String(err.message).replace(/\r?\n/g, ' ')}`);
+      const hint = / 403:/.test(err.message) ? ' The workflow token cannot tag a commit that edits .github/workflows; pin a nearby commit or tag it by hand.' : '';
+      console.log(`::error title=Release ${tag}::${String(err.message).replace(/\r?\n/g, ' ')}${hint}`);
     }
   }
   if (!made) console.log('Every dated version in CHANGELOG.md is already tagged.');

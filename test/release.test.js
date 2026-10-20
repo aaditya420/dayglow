@@ -1,7 +1,7 @@
 'use strict';
 const test = require('node:test');
 const assert = require('node:assert/strict');
-const { parseChangelog, bumpCommit, createRelease } = require('../scripts/release');
+const { parseChangelog, bumpCommit, createRelease, HISTORICAL } = require('../scripts/release');
 
 const CHANGELOG = `# Changelog
 
@@ -66,4 +66,16 @@ test('a refused release reports the status and GitHub message', async () => {
   const fetchStub = async () => ({ ok: false, status: 403, text: async () => '{"message":"Resource not accessible by integration"}' });
   await assert.rejects(createRelease({ repo: 'o/r', token: 't', tag: 'v1.0.0', target: 'a1', title: 'x', notes: 'y', latest: false }, fetchStub),
     /403.*Resource not accessible by integration/);
+});
+
+test('historical pins avoid commits that change workflow files', t => {
+  // The job's GITHUB_TOKEN is refused (403) when it tags a commit that edits .github/workflows.
+  const { execFileSync } = require('node:child_process');
+  const git = args => execFileSync('git', args, { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] });
+  for (const [version, sha] of Object.entries(HISTORICAL)){
+    let files;
+    try { files = git(['show', '--format=', '--name-only', '--first-parent', sha]); } catch { t.diagnostic(`${sha} not in this clone; skipped`); continue; }
+    assert.ok(!/^\.github\/workflows\//m.test(files), `v${version} at ${sha.slice(0, 7)} changes workflow files`);
+    assert.equal(JSON.parse(git(['show', `${sha}:package.json`])).version, version);
+  }
 });
