@@ -156,7 +156,7 @@ test/                node:test suites
 
 ## CI/CD
 
-`.github/workflows/ci.yml` runs lint, tests and a dependency audit on every push and pull request. When the Vercel secrets are present it then deploys: pushes to `main` go to production, pull requests from branches in this repository get a preview deployment. Pull requests from forks never receive secrets and are not deployed. CodeQL scans the code weekly and on every change.
+`.github/workflows/ci.yml` runs lint, tests and a dependency audit on every push and pull request. When the Vercel secrets are present it then deploys: pushes to `main` go to production, pull requests from branches in this repository get a preview deployment. Pull requests from forks never receive secrets and are not deployed. CodeQL scans the code weekly and on every change. `.github/workflows/release.yml` tags and publishes a GitHub release for each dated version in CHANGELOG.md that has no tag yet, so merging a release pull request is all a release takes.
 
 To enable deploys in your own fork, add three **repository secrets** under **Settings → Secrets and variables → Actions**:
 

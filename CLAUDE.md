@@ -131,7 +131,7 @@ To cut a release, in its own pull request titled `chore(release): X.Y.Z`:
 1. Choose the version from the commits since the last tag. Any `!` means major, any `feat` means minor, otherwise patch.
 2. Run `npm version X.Y.Z --no-git-tag-version`, which updates `package.json` and `package-lock.json`.
 3. In CHANGELOG.md, move `## [Unreleased]` to `## [X.Y.Z] - YYYY-MM-DD` and start a new, empty Unreleased section.
-4. After the pull request is merged, tag the merge commit `vX.Y.Z` and publish a GitHub release with that changelog section.
+4. After the pull request is merged, the Release workflow (`.github/workflows/release.yml`) tags the merge commit `vX.Y.Z` and publishes a GitHub release with that changelog section. Check that its run succeeded.
 
 ## Deploys
 
