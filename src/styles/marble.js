@@ -31,12 +31,9 @@ function marble(ctx, W, H, R, P, I){
         const dx = qx - o.x, dy = qy - o.y, d2 = dx*dx + dy*dy;
         if (d2 < o.r*o.r){ col = o.c; break; }
         const f = Math.sqrt(1 - o.r*o.r/d2); qx = o.x + dx*f; qy = o.y + dy*f;
-      } else if (o.t === 'tine'){
+      } else { // tine
         const dist = Math.abs((qx - o.x)*(-o.my) + (qy - o.y)*o.mx), sh = o.z*o.l/(dist + o.l);
         qx -= o.mx*sh; qy -= o.my*sh;
-      } else {
-        const dx = qx - o.x, dy = qy - o.y, dist = Math.hypot(dx, dy), a = -o.s*Math.exp(-dist/o.rad), ca = Math.cos(a), sa = Math.sin(a);
-        qx = o.x + dx*ca - dy*sa; qy = o.y + dx*sa + dy*ca;
       }
     }
     const j = (y*w + x)*4; D[j] = col[0]; D[j + 1] = col[1]; D[j + 2] = col[2]; D[j + 3] = 255;
