@@ -31,7 +31,7 @@
     "check": "npm run lint && npm test"
   },
   "dependencies": {
-    "@expo-google-fonts/manrope": "0.4.2",
+    "@expo-google-fonts/manrope": "0.4.3",
     "@napi-rs/canvas": "1.0.11",
     "astronomy-engine": "2.1.19",
     "d3-celestial": "0.7.35"
